@@ -24,30 +24,30 @@ var board = [
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
 ];
 
-function init(){
+function init() {
     generateImage();
     initActionPanel();
-    
+
 }
 
-function initActionPanel(){
+function initActionPanel() {
     actionPanel = _id("actionPanel");
-    actionPanel.setAttribute("width", 30*6+2);
-    actionPanel.setAttribute("height", 30*2+2);
+    actionPanel.setAttribute("width", 30 * 6 + 2);
+    actionPanel.setAttribute("height", 30 * 2 + 2);
     cd = actionPanel.getContext("2d");
     cd.fillStyle = "#000000";
-    cd.fillRect(0, 0, 30*6+2, 30*2+2);
+    cd.fillRect(0, 0, 30 * 6 + 2, 30 * 2 + 2);
     cd.fillStyle = "#ffffff";
-    cd.fillRect(1, 1, 30*6, 30*2);
+    cd.fillRect(1, 1, 30 * 6, 30 * 2);
     cd.fillStyle = "#000000";
     cd.font = "30px " + fonts[0];
-    cd.fillText(charTool[0].join(""), 1, 31, 30*6);
-    cd.fillText(charTool[1].join(""), 1, 61, 30*6);
+    cd.fillText(charTool[0].join(""), 1, 31, 30 * 6);
+    cd.fillText(charTool[1].join(""), 1, 61, 30 * 6);
 }
 
 function generateImage() {
     lines = board2Lines(font);
-    
+
     canvas = document.getElementById("brdCanvas");
     canvas.setAttribute("width", boardSize.toString());
     canvas.setAttribute("height", boardSize.toString());
@@ -69,16 +69,13 @@ function generateImage() {
 function mouseClick(event) {
     var x = Math.floor((event.pageX - canvas.offsetLeft) / fieldSize);
     var y = Math.floor((event.pageY - canvas.offsetTop) / fieldSize);
-    
-    //lines[y] = lines[y].substr(0, x) + chars[font][selected+(x+y)%2] + lines[y].substr(x+1, 10);
-    //_debug("selected: " + selected);
-    board[y][x] = selected;
-    updateFen();
-    
-    //_debug("board[ "+y+" ][ "+x+" ] = "+ board[y][x]);
-    
-    generateImage();
-    //_debug(lines);
+
+    if (selected != null && y > 0 && x > 0 && y < 10 && x < 10) {
+        board[y - 1][x - 1] = selected;
+        updateFen();
+        generateImage();
+    }
+
 }
 
 function changeFont() {
@@ -112,36 +109,37 @@ function setBoard() {
     generateImage();
 }
 
-function selectAction(event, object){
+function selectAction(event, object) {
     var x = event.pageX - object.offsetLeft;
     var y = event.pageY - object.offsetTop;
-        
+
     var i = Math.floor(x / 30);
     var j = Math.floor(y / 30);
-    selected = (j == 1) ? charTool[0][i] : charTool[0][i].toUpperCase();
-    
-    
+    selected = (j === 1) ? charTool[0][i] : charTool[0][i].toUpperCase();
+
+
     initActionPanel();
     cd.fillStyle = "#ff0000";
-    cd.fillText(selected, 1+30*i, 31+30*j, 30);
+    cd.fillText(charTool[0][i].toUpperCase(), 1 + 30 * i, 31 + 30 * j, 30);
     cd.fillStyle = "#000000";
-   _debug("selected: " + selected);
+    //_debug("selected: " + selected);
 }
 
-function updateFen(){
+function updateFen() {
     var _lines = ["", "", "", "", "", "", "", ""];
-    for(i = 0; i < 8; ++i)
+    var count;
+    for (i = 0; i < 8; ++i)
     {
         count = 0;
-        for(j = 0; j < 8; ++j)
+        for (j = 0; j < 8; ++j)
         {
-            if(board[i][j] == 0)
+            if (board[i][j] == 0)
             {
                 count++;
             }
             else
             {
-                if(count > 0)
+                if (count > 0)
                 {
                     _lines[i] += count;
                     count = 0;
@@ -149,22 +147,20 @@ function updateFen(){
                 _lines[i] += board[i][j];
             }
         }
-        if(count > 0)
+        if (count > 0)
             _lines[i] += count;
     }
     fen = _lines.join("/");
     _id("fen").value = fen;
 }
 
-function board2Lines(font){
+function board2Lines(font) {
     var result = chars[font].empty;
-    for(var j = 0; j != 8; ++j){
-        for(var i = 0; i != 8; ++i){
-            if(board[j][i] !== ' '){
-                //result[i+1][j+1] = chars[font][board[i][j]];
-                var code = board[j][i]+(i+j)%2;
-                //_debug(code);
-                result[j] = result[j].substr(0, i) + chars[font][code] + result[j].substr(i+1, 10);
+    for (var j = 0; j !== 8; ++j) {
+        for (var i = 0; i !== 8; ++i) {
+            if (board[j][i] !== ' ') {
+                var code = board[j][i] + (i + j) % 2;
+                result[j + 1] = result[j + 1].substr(0, i + 1) + chars[font][code] + result[j + 1].substr(i + 2, 10);
             }
         }
     }
