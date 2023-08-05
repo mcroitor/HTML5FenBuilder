@@ -89,13 +89,13 @@ function changeSize() {
 }
 function setBoard() {
     fen = document.getElementById("fen").value;
-    let l = fen.split(" ")[0].split("/");
+    let line = fen.split(" ")[0].split("/");
     let k;
 
     for (let i = 0; i < 8; ++i) {
         k = 0;
 
-        array.forEach(field => {
+        for (const field of line[i]) {
             if (isDigit(field)) {
                 k += parseInt(field);
             }
@@ -103,7 +103,7 @@ function setBoard() {
                 board[i][k] = field;
                 k++;
             }
-        });
+        };
     }
 
     generateImage();
