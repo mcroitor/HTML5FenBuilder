@@ -1,19 +1,19 @@
-var canvas;
-var context;
-var fieldSize = 26;
-var boardMargin = 0;
-var boardSize = fieldSize * 10 + boardMargin * 2;
-var font = fonts[0];
-var fen = "8/8/8/8/8/8/8/8";
-var lines = chars[font].empty;
-var charTool = [
+let canvas;
+let context;
+let fieldSize = 26;
+let boardMargin = 0;
+let boardSize = fieldSize * 10 + boardMargin * 2;
+let font = fonts[0];
+let fen = "8/8/8/8/8/8/8/8";
+let lines = chars[font].empty;
+let charTool = [
     ["k", "q", "r", "b", "n", "p", " "],
     ["l", "w", "t", "v", "m", "o", " "]
 ];
-var actionPanel;
-var selected = null;
+let actionPanel;
+let selected = null;
 
-var board = [
+let board = [
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -67,8 +67,8 @@ function generateImage() {
 }
 
 function mouseClick(event) {
-    var x = Math.floor((event.pageX - canvas.offsetLeft) / fieldSize);
-    var y = Math.floor((event.pageY - canvas.offsetTop) / fieldSize);
+    let x = Math.floor((event.pageX - canvas.offsetLeft) / fieldSize);
+    let y = Math.floor((event.pageY - canvas.offsetTop) / fieldSize);
 
     if (selected !== null && y > 0 && x > 0 && y < 10 && x < 10) {
         board[y - 1][x - 1] = selected;
@@ -89,32 +89,32 @@ function changeSize() {
 }
 function setBoard() {
     fen = document.getElementById("fen").value;
-    var l = fen.split(" ")[0].split("/");
-    var k;
+    let l = fen.split(" ")[0].split("/");
+    let k;
 
-    for (i = 0; i < 8; ++i) {
+    for (let i = 0; i < 8; ++i) {
         k = 0;
-        for (j = 0; j < l[i].length; ++j) {
-            if (isDigit(l[i][j])) {
-                k += parseInt(l[i][j]);
+
+        array.forEach(field => {
+            if (isDigit(field)) {
+                k += parseInt(field);
             }
             else {
-                var tmp = l[i][j].toString() + (i + k) % 2;
-                board[i][k] = l[i][j];
+                board[i][k] = field;
                 k++;
             }
-        }
+        });
     }
 
     generateImage();
 }
 
 function selectAction(event, object) {
-    var x = event.pageX - object.offsetLeft;
-    var y = event.pageY - object.offsetTop;
+    let x = event.pageX - object.offsetLeft;
+    let y = event.pageY - object.offsetTop;
 
-    var i = Math.floor(x / 30);
-    var j = Math.floor(y / 30);
+    let i = Math.floor(x / 30);
+    let j = Math.floor(y / 30);
     selected = (j === 1) ? charTool[0][i] : charTool[0][i].toUpperCase();
 
 
@@ -122,12 +122,11 @@ function selectAction(event, object) {
     cd.fillStyle = "#ff0000";
     cd.fillText(charTool[0][i].toUpperCase(), 1 + 30 * i, 31 + 30 * j, 30);
     cd.fillStyle = "#000000";
-    //_debug("selected: " + selected);
 }
 
 function updateFen() {
-    var _lines = ["", "", "", "", "", "", "", ""];
-    var count;
+    let _lines = ["", "", "", "", "", "", "", ""];
+    let count;
     for (i = 0; i < 8; ++i)
     {
         count = 0;
@@ -155,15 +154,15 @@ function updateFen() {
 }
 
 function board2Lines(font) {
-    var result = chars[font].empty;
-    for (var j = 0; j !== 8; ++j) {
-        for (var i = 0; i !== 8; ++i) {
+    let result = chars[font].empty;
+    for (let j = 0; j < 8; ++j) {
+        for (let i = 0; i < 8; ++i) {
             if (board[j][i] !== ' ') {
-                var code = board[j][i] + (i + j+1) % 2;
+                let code = board[j][i] + (i + j+1) % 2;
                 result[j + 1] = result[j + 1].substr(0, i + 1) + chars[font][code] + result[j + 1].substr(i + 2, 10);
             }
             else{
-                var code = ((i + j) % 2)? "light" : "dark";
+                let code = ((i + j) % 2)? "light" : "dark";
                 result[j + 1] = result[j + 1].substr(0, i + 1) + chars[font][code] + result[j + 1].substr(i + 2, 10);
             }
         }

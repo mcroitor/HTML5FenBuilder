@@ -1,0 +1,13 @@
+@font-face {
+    font-family: 'Chess Merida';
+    src: url("../fonts/merida.ttf") format("truetype"),
+         url("../fonts/merida.woff2") format("woff2");
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "Chess Usual";
+    src: url("../fonts/usual.ttf") format("truetype"),
+         url("../fonts/usual.woff2") format("woff2");
+    font-weight: normal;
+}
