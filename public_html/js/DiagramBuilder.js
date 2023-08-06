@@ -119,6 +119,7 @@ class DiagramBuilder {
         if(this.preview) {
             this.container.appendChild(this.previewPanel);
         }
+        
         this.container.style.width = this.diagram.size + 'px';
     }
 
@@ -160,6 +161,7 @@ class DiagramBuilder {
     changeSize() {
         this.diagram.config.fieldSize = document.getElementById("fieldSize").value;
         this.diagram.updateView();
+        this.container.style.width = this.diagram.size + 'px';
         this.updatePreview();
     }
 
