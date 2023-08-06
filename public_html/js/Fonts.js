@@ -1,13 +1,4 @@
-const fonts = [
-    "Chess Merida",
-    "Chess Motif",
-    "Chess Adventurer",
-    "Chess Leipzig",
-    "Chess Usual",
-    "Chess Alpha"
-];
-
-const chars = {
+const FONTS = {
 
     "Chess Merida": {
         "empty": [
@@ -127,14 +118,11 @@ const chars = {
     }
 };
 
+const CHAR_TOOL = [
+    ["k", "q", "r", "b", "n", "p", " "],
+    ["l", "w", "t", "v", "m", "o", " "]
+];
+
 function isDigit(param) {
     return (param >= '0' && param <= '9');
 };
-
-function _id(id) {
-    return document.getElementById(id);
-}
-
-function _debug(str) {
-    document.getElementById("message").innerHTML += "<p>" + str + "</p>";
-}
