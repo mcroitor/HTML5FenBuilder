@@ -70,6 +70,10 @@ class DiagramBuilder {
             option.appendChild(document.createTextNode(font));
             fontSelection.appendChild(option);
         });
+        let fontContainer = document.createElement("div");
+        fontContainer.className = "right";
+        fontContainer.appendChild(labelFontSelection);
+        fontContainer.appendChild(fontSelection);
         
         let labelFieldSizeSelection = document.createElement("label");
         labelFieldSizeSelection.setAttribute("for", "fieldSize");
@@ -80,14 +84,16 @@ class DiagramBuilder {
         fieldSizeSelection.setAttribute("type", "number");
         fieldSizeSelection.setAttribute("min", DiagramBuilder.MIN_FIELD_SIZE);
         fieldSizeSelection.setAttribute("max", DiagramBuilder.MAX_FIELD_SIZE);
+        let fieldSizeContainer = document.createElement("div");
+        fieldSizeContainer.className = "right";
+        fieldSizeContainer.appendChild(labelFieldSizeSelection);
+        fieldSizeContainer.appendChild(fieldSizeSelection);
 
         this.toolbarPanel = document.createElement("div");
         this.toolbarPanel.setAttribute("id", "toolbar");
         this.toolbarPanel.setAttribute("class", "container");
-        this.toolbarPanel.appendChild(labelFontSelection);
-        this.toolbarPanel.appendChild(fontSelection);
-        this.toolbarPanel.appendChild(labelFieldSizeSelection);
-        this.toolbarPanel.appendChild(fieldSizeSelection);
+        this.toolbarPanel.appendChild(fontContainer);
+        this.toolbarPanel.appendChild(fieldSizeContainer);
 
         let ap = document.createElement("div");
         ap.setAttribute("class", "container");

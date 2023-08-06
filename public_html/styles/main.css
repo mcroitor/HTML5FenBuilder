@@ -19,7 +19,8 @@
     /* border-bottom: 1px solid gray; */
 }
 
-.left{ float:left; }
+.left{ text-align: left; }
+.right{ text-align: right; }
 
 .king {
     cursor: url("./cursors/king.cur"), pointer;
