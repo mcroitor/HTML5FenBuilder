@@ -13,7 +13,7 @@ class ChessBoard {
         this.fen = "8/8/8/8/8/8/8/8";
     }
 
-    setBoard(fen) {
+    setFen(fen) {
         this.fen = fen;
         let line = fen.split(" ")[0].split("/");
         let k;

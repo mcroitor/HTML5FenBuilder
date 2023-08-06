@@ -2,18 +2,17 @@ class DiagramBuilder {
     constructor(elementId) {
         // attached to element
         this.container = document.getElementById(elementId);
+        this.container.className = "diagram-builder-widget";
         
         // chess board
         this.board = new ChessBoard();
         
-        // diagram configuration
-        this.fieldSize = 26;
-        this.font = Object.keys(FONTS)[0];
-        this.boardMargin = 0;
-        this.boardSize = this.fieldSize * 10 + this.boardMargin * 2;
-        this.lines = FONTS[this.font].empty;
-        this.container.className = "diagram-builder-widget";
-        this.container.style.width = this.boardSize + 'px';
+        // diagram
+        this.diagram = new ChessDiagram({
+            "fieldSize": ChessDiagram.DEFAULT_FIELD_SIZE,
+            "marginSize": 0,
+            "fontName": ChessDiagram.DEFAULT_FONT_NAME
+        });
 
         // selected pieces
         this.selected = null;
@@ -23,17 +22,17 @@ class DiagramBuilder {
         // panel elements
         this.toolbarPanel = null;
         this.actionPanel = null;
-        this.boardPanel = null;
         this.previewPanel = null;
 
         this.html();
+        this.updatePreview();
+        
         this.actionPanel.addEventListener("click", this.actionPanelClick.bind(this));
-        this.boardPanel.addEventListener("click", this.boardPanelClick.bind(this));
-
+        this.diagram.view.addEventListener("click", this.diagramClick.bind(this));
+        
         document.getElementById("fontSelection").addEventListener("click", this.changeFont.bind(this));
         document.getElementById("fieldSize").addEventListener("click", this.changeSize.bind(this));
-        this.generateImage();
-        this.updatePreview();
+
     }
 
     static get MIN_FIELD_SIZE() {
@@ -45,7 +44,7 @@ class DiagramBuilder {
     }
 
     resetActionPanel() {
-        let actionPanelContext = this.actionPanel.getContext("2d");
+        const actionPanelContext = this.actionPanel.getContext("2d");
         actionPanelContext.fillStyle = "#000000";
         actionPanelContext.fillRect(0, 0, 30 * 7 + 2, 30 * 2 + 2);
         actionPanelContext.fillStyle = "#ffffff";
@@ -59,32 +58,32 @@ class DiagramBuilder {
 
     html() {
 
-        let labelFontSelection = document.createElement("label");
+        const labelFontSelection = document.createElement("label");
         labelFontSelection.setAttribute("for", "fontSelection");
         labelFontSelection.appendChild(document.createTextNode("Font: "));
-        let fontSelection = document.createElement("select");
+        const fontSelection = document.createElement("select");
         fontSelection.setAttribute("id", "fontSelection");
         Object.keys(FONTS).forEach((font) => {
-            let option = document.createElement("option");
+            const option = document.createElement("option");
             option.setAttribute("value", font);
             option.appendChild(document.createTextNode(font));
             fontSelection.appendChild(option);
         });
-        let fontContainer = document.createElement("div");
+        const fontContainer = document.createElement("div");
         fontContainer.className = "right";
         fontContainer.appendChild(labelFontSelection);
         fontContainer.appendChild(fontSelection);
         
-        let labelFieldSizeSelection = document.createElement("label");
+        const labelFieldSizeSelection = document.createElement("label");
         labelFieldSizeSelection.setAttribute("for", "fieldSize");
         labelFieldSizeSelection.appendChild(document.createTextNode("Field Size: "));
-        let fieldSizeSelection = document.createElement("input");
+        const fieldSizeSelection = document.createElement("input");
         fieldSizeSelection.setAttribute("id", "fieldSize");
-        fieldSizeSelection.setAttribute("value", this.fieldSize);
+        fieldSizeSelection.setAttribute("value", this.diagram.config.fieldSize);
         fieldSizeSelection.setAttribute("type", "number");
         fieldSizeSelection.setAttribute("min", DiagramBuilder.MIN_FIELD_SIZE);
         fieldSizeSelection.setAttribute("max", DiagramBuilder.MAX_FIELD_SIZE);
-        let fieldSizeContainer = document.createElement("div");
+        const fieldSizeContainer = document.createElement("div");
         fieldSizeContainer.className = "right";
         fieldSizeContainer.appendChild(labelFieldSizeSelection);
         fieldSizeContainer.appendChild(fieldSizeSelection);
@@ -95,7 +94,7 @@ class DiagramBuilder {
         this.toolbarPanel.appendChild(fontContainer);
         this.toolbarPanel.appendChild(fieldSizeContainer);
 
-        let ap = document.createElement("div");
+        const ap = document.createElement("div");
         ap.setAttribute("class", "container");
         this.actionPanel = document.createElement("canvas");
         this.actionPanel.setAttribute("id", "actionPanel");
@@ -104,13 +103,10 @@ class DiagramBuilder {
         this.resetActionPanel();
         ap.appendChild(this.actionPanel);
 
-        this.boardPanel = document.createElement("canvas");
-        this.boardPanel.setAttribute("id", "boardPanel");
-
         if(this.preview) {
             this.previewPanel = document.createElement("div");
             this.previewPanel.setAttribute("id", "previewPanel");
-            let previewImage = document.createElement("img");
+            const previewImage = document.createElement("img");
             previewImage.setAttribute("src", "");
             previewImage.setAttribute("id", "previewImage");
             previewImage.setAttribute("alt", "preview");
@@ -119,72 +115,51 @@ class DiagramBuilder {
         
         this.container.appendChild(this.toolbarPanel);
         this.container.appendChild(ap);
-        this.container.appendChild(this.boardPanel);
+        this.container.appendChild(this.diagram.view);
         if(this.preview) {
             this.container.appendChild(this.previewPanel);
         }
+        this.container.style.width = this.diagram.size + 'px';
     }
 
-    generateImage() {
-        const lines = this.board.toLines(this.font);
-
-        // let canvas = document.getElementById("boardPanel");
-        this.boardPanel.setAttribute("width", this.boardSize.toString());
-        this.boardPanel.setAttribute("height", this.boardSize.toString());
-        let context = this.boardPanel.getContext("2d");
-        context.fillStyle = "#000000";
-
-        context.font = this.fieldSize.toString() + "px " + this.font;
-        for (let i = 0; i !== 10; ++i) {
-            context.fillText(lines[i],
-                this.boardMargin,
-                (i + 1) * this.fieldSize + this.boardMargin,
-                10 * this.fieldSize);
-        }
-
-        // document.getElementById("previewImage").src = canvas.toDataURL();
-        // canvas.addEventListener("click", this.mouseClick, false);
-    }
-
-    boardPanelClick(event) {
-        let canvas = this.boardPanel;
-        let offsetLeft = canvas.offsetLeft;
-        let offsetTop = canvas.offsetTop;
-        const x = Math.floor((event.pageX - offsetLeft) / this.fieldSize);
-        const y = Math.floor((event.pageY - offsetTop) / this.fieldSize);
+    diagramClick(event) {
+        const canvas = this.diagram.view;
+        const offsetLeft = canvas.offsetLeft;
+        const offsetTop = canvas.offsetTop;
+        const x = Math.floor((event.pageX - offsetLeft) / this.diagram.config.fieldSize);
+        const y = Math.floor((event.pageY - offsetTop) / this.diagram.config.fieldSize);
 
         if (this.selected !== null && y > 0 && x > 0 && y < 10 && x < 10) {
-            this.board.setPiece(x - 1, y - 1, this.selected);
-            this.generateImage();
+            this.diagram.board.setPiece(x - 1, y - 1, this.selected);
+            this.diagram.updateView();
             this.updatePreview();
         }
     }
 
     actionPanelClick(event) {
-        let x = event.pageX - this.actionPanel.offsetLeft;
-        let y = event.pageY - this.actionPanel.offsetTop;
+        const x = event.pageX - this.actionPanel.offsetLeft;
+        const y = event.pageY - this.actionPanel.offsetTop;
 
-        let i = Math.floor(x / 30);
-        let j = Math.floor(y / 30);
+        const i = Math.floor(x / 30);
+        const j = Math.floor(y / 30);
         this.selected = (j === 1) ? CHAR_TOOL[0][i] : CHAR_TOOL[0][i].toUpperCase();
 
 
-        let actionPanelContext = this.resetActionPanel();
+        const actionPanelContext = this.resetActionPanel();
         actionPanelContext.fillStyle = "#ff0000";
         actionPanelContext.fillText(CHAR_TOOL[0][i].toUpperCase(), 1 + 30 * i, 31 + 30 * j, 30);
         actionPanelContext.fillStyle = "#000000";
     }
 
     changeFont() {
-        this.font = document.getElementById("fontSelection").value;
-        this.generateImage();
+        this.diagram.config.fontName = document.getElementById("fontSelection").value;
+        this.diagram.updateView();
         this.updatePreview();
     }
     
     changeSize() {
-        this.fieldSize = document.getElementById("fieldSize").value;
-        this.boardSize = this.fieldSize * 10 + this.boardMargin * 2;
-        this.generateImage();
+        this.diagram.config.fieldSize = document.getElementById("fieldSize").value;
+        this.diagram.updateView();
         this.updatePreview();
     }
 
