@@ -32,7 +32,8 @@ class ChessDiagram {
         const context = this.view.getContext("2d");
         context.fillStyle = "#000000";
 
-        context.font = this.config.fieldSize.toString() + "px " + this.config.fontName;
+        const fontName = FONTS[this.config.fontName].fontName;
+        context.font = this.config.fieldSize.toString() + "px " + fontName;
         for (let i = 0; i < 10; ++i) {
             context.fillText(lines[i],
                 this.config.marginSize,
